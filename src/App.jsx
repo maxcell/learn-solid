@@ -1,4 +1,5 @@
-import { createSignal, createEffect, For } from "solid-js";
+import { For } from "solid-js";
+import { createStore } from "solid-js/store";
 
 function TodoInput(props) {
   function onSubmit(event) {
@@ -48,27 +49,21 @@ function TodoItem(props) {
 
 function App() {
 
-  const [todos, setTodos] = createSignal([])
+  const [state, setState] = createStore({todos: []})
 
   function addTodo(todoText) {
-    setTodos(todos => [...todos, { text: todoText, status: "incomplete" }])
+    setState('todos', state.todos.length, { text: todoText, status: "incomplete" })
   }
 
   function setComplete(index) {
-    return () => setTodos(todos => [
-      ...todos.slice(0, index), 
-      {...todos[index], status: "complete"},
-      ...todos.slice(index+1)
-    ])
+    return () => setState('todos', index, "status", "complete")
   }
-
-  createEffect(() => console.log(todos()))
 
   return (
     <>
       <TodoInput addTodo={addTodo}/>
       <ol>
-        <For each={todos()} fallback={<p>No todos set</p>}>
+        <For each={state.todos} fallback={<p>No todos set</p>}>
           {(todo, index) => (<TodoItem text={todo.text} status={todo.status} setComplete={setComplete(index())} />)}
         </For>
       </ol>
